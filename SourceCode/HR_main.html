@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <title>Galileo Design</title>
+  <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+  <link rel="stylesheet" as="style" onload="this.rel='stylesheet'"
+    href="https://fonts.googleapis.com/css2?display=swap&amp;family=Manrope%3Awght%40400%3B500%3B700%3B800&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style>
+    @media (max-width: 1023px) {
+      .card {
+        min-width: calc(50% - 1rem) !important;
+        max-width: calc(50% - 1rem) !important;
+      }
+      .button-container {
+        flex-wrap: wrap;
+      }
+      .button-container .btn.details {
+        flex-basis: 100%;
+        margin-bottom: 0.5rem;
+      }
+      .button-container .btn.approve,
+      .button-container .btn.reject {
+        flex-basis: calc(50% - 0.25rem);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden" style="--checkbox-tick-svg: url('data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27rgb(255,255,255)%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z%27/%3e%3c/svg%3e');
+                font-family: 'Manrope', 'Noto Sans', sans-serif;">
+    <div class="layout-container flex h-full grow flex-col">
+      <header
+        class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f2f4] px-4 sm:px-10 py-3">
+        <div class="flex items-center gap-4 text-[#111418]">
+          <div class="size-4">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M4 42.4379C4 42.4379 14.0962 36.0744 24 41.1692C35.0664 46.8624 44 42.2078 44 42.2078L44 7.01134C44 7.01134 35.068 11.6577 24.0031 5.96913C14.0971 0.876274 4 7.27094 4 7.27094L4 42.4379Z"
+                fill="currentColor"></path>
+            </svg>
+          </div>
+          <h2 class="text-[#111418] text-lg font-bold leading-tight tracking-[-0.015em]">Leave Management</h2>
+          <nav class="hidden sm:flex items-center gap-4 text-[#111418]">
+            <a href="javascript:navigateToApplication();" class="text-lg hover:underline">Application</a>
+            <span>|</span>
+            <a href="javascript:navigateToCalendar();" class="text-lg  hover:underline">Who's On Leave</a>
+          </nav>
+        </div>
+        <div>
+          <p>Employee ID:
+            <?!= loggedId ?>
+          </p>
+        </div>
+      </header>
+      <div class="px-4 sm:px-10 md:px-20 lg:px-40 flex flex-1 justify-center py-5">
+        <div class="layout-content-container flex flex-col w-full py-5 flex-1">
+          <h1 class="text-[#111418] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 text-left pb-3 pt-5">
+            Leave Application
+          </h1>
+          <div id="leave-cards" class="card-group flex flex-wrap gap-4 px-4">
+            <!-- Leave cards will be injected here by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function navigateToCalendar() {
+    google.script.run.withSuccessHandler(function(url) {
+      window.open(url, '_blank');
+    }).redirectToCalendar();
+    }
+
+    function navigateToApplication() {
+    google.script.run.withSuccessHandler(function(url) {
+      window.open(url, '_blank');
+    }).redirectToApplication();
+    }
+
+    function formatDate(dateString) {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+    }
+
+    function calculateDays(startDate, endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = Math.abs(end - start);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include both start and end dates
+    return diffDays;
+    } 
+    
+    function renderLeaveApplications(applications) {
+      const container = document.getElementById('leave-cards');
+      container.innerHTML = '';
+
+      applications.forEach(application => {
+          const [timestamp, startDate, endDate, reason, leaveType, status, fullName, approvedLeavesDays, employeeId] = application;
+          const card = document.createElement('div');
+          card.className = 'card border border-[#dce0e5] rounded-xl p-4 flex-1 min-w-[30%] max-w-[30%]';
+
+          card.innerHTML = `
+              <div class="card-body flex flex-col h-full">
+                  <h4 class="card-title text-lg font-bold">${fullName} - ${leaveType}</h4>
+                  <p class="card-text text-base flex-grow">
+                       ${formatDate(startDate)} - ${formatDate(endDate)} (${calculateDays(startDate, endDate)} days)<br>
+                      Leaves This Month: ${approvedLeavesDays} days
+                  </p>
+                  <div class="button-container flex justify-between items-end gap-2 mt-4">
+                      <button type="button" class="btn details flex-1 cursor-pointer flex items-center justify-center overflow-hidden rounded-xl h-10 px-2 bg-[#4caf50] text-white text-sm font-bold leading-normal tracking-[0.015em]" onclick="showDetails('${employeeId}', '${timestamp}')">
+                          <span class="truncate">Details</span>
+                      </button>
+                      <button type="button" class="btn approve flex-1 cursor-pointer flex items-center justify-center overflow-hidden rounded-xl h-10 px-2 bg-[#1979e6] text-white text-sm font-bold leading-normal tracking-[0.015em]" onclick="confirmAction('${employeeId}', '${timestamp}', 'Approved')">
+                          <span class="truncate">Approve</span>
+                      </button>
+                      <button type="button" class="btn reject flex-1 cursor-pointer flex items-center justify-center overflow-hidden rounded-xl h-10 px-2 bg-[#f44336] text-white text-sm font-bold leading-normal tracking-[0.015em]" onclick="confirmAction('${employeeId}', '${timestamp}', 'Rejected')">
+                          <span class="truncate">Reject</span>
+                      </button>
+                  </div>
+              </div>
+          `;
+
+          container.appendChild(card);
+      });
+    }
+
+    function showDetails(employeeId,timestamp) {
+        google.script.run
+            .withSuccessHandler(function(url) {
+                window.open(url, '_blank');
+            })
+            .getDetailsPageUrl(employeeId, timestamp);
+    }    
+
+    function confirmAction(employeeId, timestamp, status) {
+        const action = status === 'Approved' ? 'Approve' : 'Reject';
+        const confirmation = confirm(`Are you sure you want to ${action.toLowerCase()} this leave application?`);
+          if (confirmation) {
+              google.script.run
+                  .withSuccessHandler(function(result) {
+                      alert(result); // This will show the success message from the server
+                      loadLeaveApplications();
+                  })
+                  .withFailureHandler(function(error) {
+                      alert('An error occurred: ' + error.message);
+                  })
+                  .updateLeaveApplicationStatus(employeeId, timestamp, status);
+          }
+    }
+
+    function loadLeaveApplications() {
+        google.script.run
+            .withSuccessHandler(function (data) {
+                renderLeaveApplications(JSON.parse(data));
+            })
+            .withFailureHandler(function(error) {
+                alert('Failed to load leave applications. Please refresh the page.');
+            })
+            .getLeaveApplications();
+    }
+
+    window.onload = loadLeaveApplications;
+  </script>
+</body>
+
+</html>
