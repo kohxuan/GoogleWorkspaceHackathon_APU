@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <title>Monthly Leave Calendar</title>
+  <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+  <link rel="stylesheet" as="style" onload="this.rel='stylesheet'"
+    href="https://fonts.googleapis.com/css2?display=swap&amp;family=Manrope%3Awght%40400%3B500%3B700%3B800&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <style>
+    body {
+      font-family: 'Manrope', sans-serif;
+      background-color: #f8f9fa;
+    }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      margin-top: 20px;
+      padding: 20px;
+      display: flex;
+    }
+
+    table {
+      width: 100%;
+      min-width: 800px;
+      border-collapse: collapse;
+      background-color: #ffffff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th,
+    td {
+      padding: 12px;
+      border: 1px solid #dee2e6;
+      text-align: center;
+    }
+
+    th {
+        padding: 12px;
+        border: 1px solid #dee2e6;
+        text-align: center;
+    }
+    .today {
+        background-color: #FFD700;
+        color: #000000;
+        font-weight: bold;
+    }
+
+    .leave-symbol {
+      background-color: #ffefef;
+      color: black;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-top: 20px;
+      color: #333;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden"
+    style="--checkbox-tick-svg: url('data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27rgb(255,255,255)%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z%27/%3e%3c/svg%3e'); font-family: Manrope, &quot;Noto Sans&quot;, sans-serif;">
+    <div class="layout-container flex h-full grow flex-col">
+      <header
+        class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f2f4] px-10 py-3">
+        <div class="flex items-center gap-4 text-[#111418]">
+          <div class="size-4">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M4 42.4379C4 42.4379 14.0962 36.0744 24 41.1692C35.0664 46.8624 44 42.2078 44 42.2078L44 7.01134C44 7.01134 35.068 11.6577 24.0031 5.96913C14.0971 0.876274 4 7.27094 4 7.27094L4 42.4379Z"
+                fill="currentColor"></path>
+            </svg>
+          </div>
+          <h2 class="text-[#111418] text-lg font-bold leading-tight tracking-[-0.015em]">Leave Management</h2>
+          <nav id="nav-bar" class="flex items-center gap-4 text-[#111418]">
+            <!-- Navigation links will be added here by JavaScript -->
+          </nav>
+        </div>
+        <div>
+          <p>Employee ID:
+            <?!= loggedId ?>
+          </p>
+        </div>
+      </header>
+      <h1 class="text-[#111418] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 text-left pb-3 pt-5">
+        Monthly Leave Calendar</h1>
+      <div id="calendar" class="table-container container mx-auto p-4"></div>
+      <script>
+        function navigateToCalendar() {
+        google.script.run.withSuccessHandler(function(url) {
+            window.open(url, '_blank');
+        }).redirectToCalendar();
+        }
+
+        function navigateToApplication() {
+            google.script.run.withSuccessHandler(function(url) {
+                window.open(url, '_blank');
+            }).redirectToApplication();
+        }
+
+        function navigateToHistory() {
+            google.script.run.withSuccessHandler(function(url) {
+                window.open(url, '_blank');
+            }).redirectToHistory();
+        }
+
+        function populateCalendar(leaveData) {
+        var calendarDiv = document.getElementById('calendar');
+        var data = JSON.parse(leaveData);
+        var leavesByEmployee = data.leavesByEmployee;
+
+        // Create table
+        var table = document.createElement('table');
+        var thead = document.createElement('thead');
+        var tbody = document.createElement('tbody');
+
+        // Create header row
+        var headerRow = document.createElement('tr');
+        var nameHeader = document.createElement('th');
+        nameHeader.textContent = 'Name';
+        nameHeader.style.backgroundColor = '#1979e6'; // Blue background
+        nameHeader.style.color = 'white';
+        nameHeader.style.fontWeight = '700';
+        headerRow.appendChild(nameHeader);
+
+        // Create date headers
+        var today = new Date();
+        var startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        var endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        var daysInMonth = endOfMonth.getDate();
+
+        for (var date = new Date(startOfMonth); date <= endOfMonth; date.setDate(date.getDate() + 1)) {
+        var th = document.createElement('th');
+        th.textContent = date.getDate();
+        
+        // Set default style for all date headers
+        th.style.backgroundColor = '#1979e6'; // Blue background
+        th.style.color = 'white';
+        th.style.fontWeight = '700';
+        
+        // Highlight today's date
+        if (date.getDate() === today.getDate() && 
+            date.getMonth() === today.getMonth() && 
+            date.getFullYear() === today.getFullYear()) {
+            th.style.backgroundColor = '#FFD700'; // Gold color for today's date
+            th.style.color = '#000000'; // Black text for contrast
+        }
+        
+        headerRow.appendChild(th);
+        }
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        // Create rows for each employee
+        for (var employeeName in leavesByEmployee) {
+            var row = document.createElement('tr');
+            var employeeCell = document.createElement('td');
+            employeeCell.textContent = employeeName;
+            row.appendChild(employeeCell);
+
+            // Initialize all cells as empty
+            var cellData = [];
+            for (var date = new Date(startOfMonth); date <= endOfMonth; date.setDate(date.getDate() + 1)) {
+                cellData.push('');
+            }
+
+            // Add leave symbol for the leave dates
+            for (var leaveDate of leavesByEmployee[employeeName]) {
+                var leaveDateObj = new Date(leaveDate);
+                var dayIndex = leaveDateObj.getDate() - 1; // 0-based index for the day of the month
+                cellData[dayIndex] = 'X';
+            }
+
+            // Add cells to the row
+            for (var i = 0; i < daysInMonth; i++) {
+                var cell = document.createElement('td');
+                if (cellData[i] === 'X') {
+                    cell.classList.add('leave-symbol');
+                    cell.textContent = cellData[i];
+                } else {
+                    cell.textContent = ' ';
+                }
+                row.appendChild(cell);
+            }
+            tbody.appendChild(row);
+        }
+        table.appendChild(tbody);
+        calendarDiv.appendChild(table);
+        }
+
+        function setupNavigation() {
+         var userRole = '<?= userRole ?>'; // Pass the role from the server-side
+          var navBar = document.getElementById('nav-bar');
+          var navLinks = '';
+
+          if (userRole === 'manager') {
+            navLinks += '<a href="javascript:navigateToApplication();" class="text-lg hover:underline">Application</a>';
+          }
+          
+          if (userRole === 'staff') {
+            navLinks += '<a href="javascript:navigateToHistory();" class="text-lg hover:underline">History</a>';
+          }
+
+          navLinks += '<span>|</span><a href="javascript:navigateToCalendar();" class="text-lg hover:underline">Who\'s On Leave</a>';
+
+          navBar.innerHTML = navLinks;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+          setupNavigation();
+          google.script.run.withSuccessHandler(populateCalendar).getMonthlyLeaves();
+        });
+      </script>
+    </div>
+  </div>
+</body>
+
+</html>
