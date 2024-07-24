@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <title>Leave Management</title>
+  <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+  <link rel="stylesheet" as="style" onload="this.rel='stylesheet'"
+    href="https://fonts.googleapis.com/css2?display=swap&amp;family=Manrope%3Awght%40400%3B500%3B700%3B800&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    var employeeId = '<?= employeeId ?>';
+        var timestamp = '<?= timestamp ?>';
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric', 
+            });
+        }
+
+        function populateData(data) {
+            document.getElementById('employee-id').textContent = data.employeeId;
+            document.getElementById('full-name').textContent = data.fullName;
+            document.getElementById('department').textContent = data.department;
+            document.getElementById('title').textContent = data.title;
+            document.getElementById('employment-status').textContent = data.employmentStatus;
+            document.getElementById('date-of-hire').textContent = data.dateOfHire;
+            document.getElementById('manager').textContent = data.manager;
+            document.getElementById('salary').textContent = data.salary;
+            document.getElementById('type-of-leave').textContent = data.typeOfLeave;
+            document.getElementById('leave-taken-this-month').textContent = `${data.leaveTakenThisMonth} days`;
+            document.getElementById('start-date').textContent = formatDate(data.startDate);
+            document.getElementById('end-date').textContent = formatDate(data.endDate);
+            document.getElementById('reason').textContent = data.reason;
+        }
+
+        function loadDetails() {
+            if (employeeId && timestamp) {
+              google.script.run
+                .withSuccessHandler(function(result) {
+                  try {
+                    var data = JSON.parse(result);
+                    populateData(data);
+                  } catch (e) {
+                    alert('Error parsing JSON: ' + e.message);
+                  }
+                })
+                .withFailureHandler(function(error) {
+                  alert('Error: ' + error.message);
+                })
+                .getLeaveDetailById(employeeId, timestamp);
+            } else {
+              alert('Invalid parameters.');
+            }
+        }
+
+        function confirmAction(employeeId, timestamp, status) {
+          const action = status === 'Approved' ? 'Approve' : 'Reject';
+          const confirmation = confirm(`Are you sure you want to ${action.toLowerCase()} this leave application?`);
+          if (confirmation) {
+              google.script.run
+                  .withSuccessHandler(function(result) {
+                      alert(result); // This will show the success message from the server
+                      window.close(); // Close the details page after successful action
+                  })
+                  .withFailureHandler(function(error) {
+                      alert('An error occurred: ' + error.message);
+                  })
+                  .updateLeaveApplicationStatus(employeeId, timestamp, status);
+          }
+        }
+
+        // Function to set up action buttons
+        function setupActionButtons() {
+            const backButton = document.querySelector('.btn.approve:nth-child(1)');
+            const approveButton = document.querySelector('.btn.approve:nth-child(2)');
+            const rejectButton = document.querySelector('.btn.reject');
+
+            backButton.onclick = function() {
+            google.script.run.withSuccessHandler(function(url) {
+                window.top.location.href = url;
+            }).getMainPageUrl();
+            };
+            approveButton.onclick = () => confirmAction(employeeId, timestamp, 'Approved');
+            rejectButton.onclick = () => confirmAction(employeeId, timestamp, 'Rejected');
+        }
+
+        function navigateToCalendar() {
+        google.script.run.withSuccessHandler(function(url) {
+            window.open(url, '_blank');
+        }).redirectToCalendar();
+        }
+
+        function navigateToApplication() {
+            google.script.run.withSuccessHandler(function(url) {
+                window.open(url, '_blank');
+            }).redirectToApplication();
+        }
+
+        // Call setupActionButtons when the page loads
+        window.onload = function() {
+            loadDetails();
+            setupActionButtons();
+        };
+  </script>
+</head>
+
+<body>
+  <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden" style="--checkbox-tick-svg: url('data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27rgb(255,255,255)%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z%27/%3e%3c/svg%3e');
+                font-family: 'Manrope', 'Noto Sans', sans-serif;">
+    <div class="layout-container flex h-full grow flex-col">
+      <header
+        class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f2f4] px-10 py-3">
+        <div class="flex items-center gap-4 text-[#111418]">
+          <div class="size-4">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M4 42.4379C4 42.4379 14.0962 36.0744 24 41.1692C35.0664 46.8624 44 42.2078 44 42.2078L44 7.01134C44 7.01134 35.068 11.6577 24.0031 5.96913C14.0971 0.876274 4 7.27094 4 7.27094L4 42.4379Z"
+                fill="currentColor"></path>
+            </svg>
+          </div>
+          <h2 class="text-[#111418] text-lg font-bold leading-tight tracking-[-0.015em]">Leave Management</h2>
+          <nav class="flex items-center gap-4 text-[#111418]">
+            <a href="javascript:navigateToApplication();" class="text-lg hover:underline">Application</a>
+            <span>|</span>
+            <a href="javascript:navigateToCalendar();" class="text-lg  hover:underline">Who's On Leave</a>
+          </nav>
+        </div>
+        <div>
+          <p>Employee ID:
+            <?!= loggedId ?>
+          </p>
+        </div>
+      </header>
+      <main class="container mx-auto p-6">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+      <h2 class="text-xl font-bold mb-4">Employee Information</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <!-- Employee Information fields -->
+        <div class="form-group">
+          <label class="font-bold mb-2 block">Employee ID</label>
+          <p class="text-base font-normal text-[#111418]" id="employee-id"></p>
+        </div>
+        <div class="form-group">
+          <label class="font-bold mb-2 block">Full Name</label>
+          <p class="text-base font-normal text-[#111418]" id="full-name"></p>
+        </div>
+        <div class="form-group">
+          <label class="font-bold mb-2 block">Department</label>
+          <p class="text-base font-normal text-[#111418]" id="department"></p>
+        </div>
+        <div class="form-group">
+          <label class="font-bold mb-2 block">Title</label>
+          <p class="text-base font-normal text-[#111418]" id="title"></p>
+        </div>
+        <div class="form-group">
+          <label class="font-bold mb-2 block">Employment Status</label>
+          <p class="text-base font-normal text-[#111418]" id="employment-status"></p>
+        </div>
+        <div class="form-group">
+          <label class="font-bold mb-2 block">Date of Hire</label>
+          <p class="text-base font-normal text-[#111418]" id="date-of-hire"></p>
+        </div>
+        <div class="form-group">
+          <label class="font-bold mb-2 block">Manager</label>
+          <p class="text-base font-normal text-[#111418]" id="manager"></p>
+        </div>
+        <div class="form-group">
+          <label class="font-bold mb-2 block">Salary</label>
+          <p class="text-base font-normal text-[#111418]" id="salary"></p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+      <h2 class="text-xl font-bold mb-4">Leave Details</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <!-- Leave Details fields -->
+        <div class="form-group">
+          <label class="font-bold mb-2 block">Leave Type</label>
+          <p class="text-base font-normal text-[#111418]" id="type-of-leave"></p>
+        </div>
+        <div class="form-group">
+          <label class="font-bold mb-2 block">Leave Taken This Month</label>
+          <p class="text-base font-normal text-[#111418]" id="leave-taken-this-month"></p>
+        </div>
+        <div class="form-group">
+          <label class="font-bold mb-2 block">Leave Start Date</label>
+          <p class="text-base font-normal text-[#111418]" id="start-date"></p>
+        </div>
+        <div class="form-group">
+          <label class="font-bold mb-2 block">Leave End Date</label>
+          <p class="text-base font-normal text-[#111418]" id="end-date"></p>
+        </div>
+        <div class="form-group sm:col-span-2">
+          <label class="font-bold mb-2 block">Reason for Leave</label>
+          <p class="text-base font-normal text-[#111418]" id="reason"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+      <div class="flex justify-end mt-6 gap-3">
+        <button type="button" class="btn approve min-w-[84px] max-w-[480px] cursor-pointer flex items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#1979e6] text-white text-sm font-bold leading-normal tracking-[0.015em]" style="background-color: #808080 !important;">
+          <span class="truncate">Back</span>
+        </button>
+        <button type="button" class="btn approve min-w-[84px] max-w-[480px] cursor-pointer flex items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#1979e6] text-white text-sm font-bold leading-normal tracking-[0.015em]">
+          <span class="truncate">Approve</span>
+        </button>
+        <button type="button" class="btn reject min-w-[84px] max-w-[480px] cursor-pointer flex items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#f44336] text-white text-sm font-bold leading-normal tracking-[0.015em]">
+          <span class="truncate">Reject</span>
+        </button>
+      </div>
+  </main>
+  </div>
+
+</body>
+
+</html>
