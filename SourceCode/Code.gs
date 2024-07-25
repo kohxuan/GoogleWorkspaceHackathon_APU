@@ -466,6 +466,7 @@ function getLeaveData(employeeEmail) {
   const startDateIndex = headers.indexOf('Start Date');
   const endDateIndex = headers.indexOf('End Date');
   const timestampIndex = headers.indexOf('Timestamp');
+  const statusIndex = headers.indexOf('Status');
 
   // Get data from 'employee' sheet
   const employeeData = employeeSheet.getDataRange().getValues();
@@ -476,7 +477,7 @@ function getLeaveData(employeeEmail) {
   // Collect leave records for the given employeeEmail
   const leaveRecords = [];
   for (let i = 1; i < leaveResponsesData.length; i++) {
-    if (leaveResponsesData[i][employeeEmailIndex] === employeeEmail) {
+    if (leaveResponsesData[i][employeeEmailIndex] === employeeEmail && leaveResponsesData[i][statusIndex] !== '') {
       const startDate = leaveResponsesData[i][startDateIndex];
       const endDate = leaveResponsesData[i][endDateIndex];
       const timestampStr = leaveResponsesData[i][timestampIndex];
@@ -521,6 +522,7 @@ function getLeaveData(employeeEmail) {
     leaveBalance
   });
 }
+
 function getUserEmail() {
   return Session.getActiveUser().getEmail();
 }
