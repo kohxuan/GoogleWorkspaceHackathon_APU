@@ -1,4 +1,4 @@
-# GoogleWorkspaceHackathon_APU
+# Google Workspace Hackathon 2024
 ### Group : UwU
 ### Group Members :
 <table>
