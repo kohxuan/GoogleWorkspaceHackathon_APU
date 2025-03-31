@@ -29,7 +29,7 @@
 <br>
 
 ### 📋Submissions
-1. [Pitch Deck](https://www.canva.com/design/DAGL2cZdHUc/1XlEqrx_Ei50JFZLyIxssA/view?utm_content=DAGL2cZdHUc&utm_campaign=designshare&utm_medium=link&utm_source=editor)
+1. [Pitch Deck](https://www.canva.com/design/DAGjUfJbJvI/p17m0lCkvfgY0xBI48CKCA/view?utm_content=DAGjUfJbJvI&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h1fe42e03e4)
 2. [Pitch Video](https://youtu.be/memybddZnkc)
 3. [GitHub Repository](https://github.com/kohxuan/GoogleWorkspaceHackathon_APU/tree/main/SourceCode)
 <br>
