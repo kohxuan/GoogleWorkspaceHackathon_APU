@@ -38,9 +38,9 @@
 
 <br>
 
-# 📅 Leave Tracking and Management System
+# 📅 Automated Leave Tracking and Management System
 
-The **Leave Tracking and Management System** is a comprehensive web-based application designed to streamline the management of employee leave within an organization. This project leverages Google Apps Script and Google Sheets to provide a dynamic and interactive platform for both HR managers and employees.
+The **Automated Leave Tracking and Management System** is a comprehensive web-based application designed to streamline the management of employee leave within an organization. This project leverages Google Apps Script and Google Sheets to provide a dynamic and interactive platform for both HR managers and employees.
 <br><br>
 
 ### ✨ Features
